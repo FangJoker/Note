@@ -734,78 +734,22 @@ helloworld.jsp 代码
 ## 注解 ##
 
 ##常用注解##
-
-### 1、@Controller ###
-> 在SpringMVC 中，控制器Controller 负责处理由DispatcherServlet 分发的请求，它把用户请求的数据经过业务处理层处理之后封装成一个Model ，然后再把该Model 返回给对应的View 进行展示。在SpringMVC 中提供了一个非常简便的定义Controller 的方法，你无需继承特定的类或实现特定的接口，只需使用@Controller 标记一个类是Controller ，然后使用@RequestMapping 和@RequestParam 等一些注解用以定义URL 请求和Controller 方法之间的映射，这样的Controller 就能被外界访问到。此外Controller 不会直接依赖于HttpServletRequest 和HttpServletResponse 等HttpServlet 对象，它们可以通过Controller 的方法参数灵活的获取到。
-> 
-> @Controller 用于标记在一个类上，使用它标记的类就是一个SpringMVC Controller 对象。分发处理器将会扫描使用了该注解的类的方法，并检测该方法是否使用了@RequestMapping 注解。@Controller 只是定义了一个控制器类，而使用@RequestMapping 注解的方法才是真正处理请求的处理器。单单使用@Controller 标记在一个类上还不能真正意义上的说它就是SpringMVC 的一个控制器类，因为这个时候Spring 还不认识它。那么要如何做Spring 才能认识它呢？这个时候就需要我们把这个控制器类交给Spring 来管理。有两种方式：
-> 　　（1）在SpringMVC 的配置文件中定义MyController 的bean 对象。
-> 　　（2）在SpringMVC 的配置文件中告诉Spring 该到哪里去找标记为@Controller 的Controller 控制器。
-   
-        <!--方式一-->
-		<bean class="com.host.app.web.controller.MyController"/>
-		<!--方式二-->
-	< context:component-scan base-package = "com.host.app.web" />//路径写到controller的上一层
-
-    
-
-### 2、@RequestMapping ###
-> RequestMapping是一个用来处理请求地址映射的注解，可用于类或方法上。用于类上，表示类中的所有响应请求的方法都是以该地址作为父路径。
-> RequestMapping注解有六个属性，下面我们把她分成三类进行说明（下面有相应示例）。
-> 1、 value， method；
-> value：     指定请求的实际地址，指定的地址可以是URI Template 模式（后面将会说明）；
-> method：  指定请求的method类型， GET、POST、PUT、DELETE等；
-> 2、consumes，produces
-> consumes： 指定处理请求的提交内容类型（Content-Type），例如application/json, text/html;
-> produces:    指定返回的内容类型，仅当request请求头中的(Accept)类型中包含该指定类型才返回；
-> 3、params，headers
-> params： 指定request中必须包含某些参数值是，才让该方法处理。
-> headers： 指定request中必须包含某些指定的header值，才能让该方法处理请求。
-
-### 3、@Resource和@Autowired ###
-> @Resource和@Autowired都是做bean的注入时使用，其实@Resource并不是Spring的注解，它的包是javax.annotation.Resource，需要导入，但是Spring支持该注解的注入。
-> 1、共同点
-> 两者都可以写在字段和setter方法上。两者如果都写在字段上，那么就不需要再写setter方法。
-> 2、不同点
-> （1）@Autowired
-> @Autowired为Spring提供的注解，需要导入包org.springframework.beans.factory.annotation.Autowired;只按照byType注入。
-	 public class TestServiceImpl {
-    // 下面两种@Autowired只要使用一种即可
-    	@Autowired
-    private UserDao userDao; // 用于字段上
-    
-    @Autowired
-    public void setUserDao(UserDao userDao) { // 用于属性的方法上
-        this.userDao = userDao;
-    }
-	}
-> @Autowired注解是按照类型（byType）装配依赖对象，默认情况下它要求依赖对象必须存在，如果允许null值，可以设置它的required属性为false。如果我们想使用按照名称（byName）来装配，可以结合@Qualifier注解一起使用。如下：
- 
-	public class TestServiceImpl {
-     @Autowired
-     @Qualifier("userDao")
-     private UserDao userDao; 
-	}
-
-> （2）@Resource
-> @Resource默认按照ByName自动注入，由J2EE提供，需要导入包javax.annotation.Resource。@Resource有两个重要的属性：name和type，而Spring将@Resource注解的name属性解析为bean的名字，而type属性则解析为bean的类型。所以，如果使用name属性，则使用byName的自动注入策略，而使用type属性时则使用byType自动注入策略。如果既不制定name也不制定type属性，这时将通过反射机制使用byName自动注入策略。
- 
-    public class TestServiceImpl {
-    // 下面两种@Resource只要使用一种即可
-      @Resource(name="userDao")
-      private UserDao userDao; // 用于字段上
-    
-      @Resource(name="userDao")
-      public void setUserDao(UserDao userDao) { // 用于属性的setter方法上
-        this.userDao = userDao;
-     }
-    }
-> 
-> 注：最好是将@Resource放在setter方法上，因为这样更符合面向对象的思想，通过set、get去操作属性，而不是直接去操作属性。
-> @Resource装配顺序：
-> ①如果同时指定了name和type，则从Spring上下文中找到唯一匹配的bean进行装配，找不到则抛出异常。
-> ②如果指定了name，则从上下文中查找名称（id）匹配的bean进行装配，找不到则抛出异常。
-> ③如果指定了type，则从上下文中找到类似匹配的唯一bean进行装配，找不到或是找到多个，都会抛出异常。
-> ④如果既没有指定name，又没有指定type，则自动按照byName方式进行装配；如果没有匹配，则回退为一个原始类型进行匹配，如果匹配则自动装配。
-> @Resource的作用相当于@Autowired，不过@Autowired按照byType自动注入。
-
+### @Controller ###
+　　负责注册一个bean 到spring 上下文中
+### @RequestMapping ###
+　　注解为控制器指定可以处理哪些 URL 请求
+### @RequestBody ###
+　　该注解用于读取Request请求的body部分数据，使用系统默认配置的HttpMessageConverter进行解析，然后把相应的数据绑定 到要返回的对象上 ,再把HttpMessageConverter返回的对象数据绑定到 controller中方法的参数上
+　### @ResponseBody ###
+　　该注解用于将Controller的方法返回的对象，通过适当的HttpMessageConverter转换为指定格式后，写入到Response对象的body数据区
+### @ModelAttribute  ###　　　
+　　在方法定义上使用 @ModelAttribute 注解：Spring MVC 在调用目标处理方法前，会先逐个调用在方法级上标注了@ModelAttribute 的方法
+　　在方法的入参前使用 @ModelAttribute 注解：可以从隐含对象中获取隐含的模型数据中获取对象，再将请求参数 –绑定到对象中，再传入入参将方法入参对象添加到模型中
+### @RequestParam　 ###
+　　在处理方法入参处使用 @RequestParam 可以把请求参 数传递给请求方法
+### @PathVariable ###
+　　绑定 URL 占位符到入参
+### @ExceptionHandler ###
+　　注解到方法上，出现异常时会执行该方法
+### @ControllerAdvice ###
+　　使一个Contoller成为全局的异常处理类，类中用@ExceptionHandler方法注解的方法可以处理所有Controller发生的异常
