@@ -3,6 +3,9 @@ package com.czl.controller;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.servlet.ModelAndView;
+
 @Controller  
 @RequestMapping("/MyController")  //∑√Œ ±Íº«
 
@@ -18,10 +21,18 @@ public class FirstController {
 	public String form(Model model){
 		return "form";
 	}
-	@RequestMapping("/person")
-	public String toPerson(String name,double age){
-	    System.out.println(name+" "+age);
-	    return "helloworld";
+		
+	@RequestMapping(value="/get",method=RequestMethod.GET)
+	public ModelAndView getTest(){
+		String result ="this is get test";
+		return new ModelAndView("/show", "result", result);
 	}
+	
+	@RequestMapping(value="/post", method=RequestMethod.POST)
+	public ModelAndView getPost(String userName){
+		String result ="userName is "+userName;
+		return new ModelAndView("/show", "result",result);
+	}
+	
 	
 }
