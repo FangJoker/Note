@@ -9,8 +9,11 @@
 </head>
 <body>
 	表单
+	<form action="/MySpringMVC/MyController/post" method="post">
 	</br> 用户名：
-	<input name="userName" method="post">
+	<input name="userName" >
 	<button type="submit">提交</button>
+	</form>
+	
 </body>
 </html>
