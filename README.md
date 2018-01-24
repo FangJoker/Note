@@ -753,3 +753,38 @@ helloworld.jsp 代码
 　　注解到方法上，出现异常时会执行该方法
 ### @ControllerAdvice ###
 　　使一个Contoller成为全局的异常处理类，类中用@ExceptionHandler方法注解的方法可以处理所有Controller发生的异常
+## 传递参数 ##
+
+首先得找到MyEclipse Tomcat -config的server.xml
+将在 < Connector  connectionTimeout="20000" port="8080" protocol="HTTP/1.1" redirectPort="8443" / >后面加上 URIEncoding="UTF-8"。 这样是为了页面向服务器传递参数的编码也修改为utf-8，编码POST过去是中文乱码
+
+### GET ###
+控制器:
+	
+	@RequestMapping(value="/get",method=RequestMethod.GET)
+	public ModelAndView getTest(){
+		String result ="this is get test";
+		return new ModelAndView("/show", "result", result);
+	}
+	
+JSP:
+	
+	<body>
+    < h1 >注解的使用< h1 >
+    <br/>
+     < h2>${result}< /h2>
+	</body>
+	</html>
+
+
+![](https://i.imgur.com/hiUIAHS.png)
+
+### POST ###
+	@RequestMapping(value="/post", method=RequestMethod.POST)
+	public ModelAndView getPost(String userName){
+		String result ="userName is "+userName;
+		return new ModelAndView("/show", "result",result);
+	}
+
+![](https://i.imgur.com/SI8DYup.png)
+![](https://i.imgur.com/x2Ndx2J.png)
