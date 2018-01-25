@@ -1,10 +1,13 @@
 package com.czl.controller;
 
+import java.util.*;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
+import com.czl.model.*;
 
 @Controller  
 @RequestMapping("/MyController")  //访问标记
@@ -29,10 +32,18 @@ public class FirstController {
 	}
 	
 	@RequestMapping(value="/post", method=RequestMethod.POST)
-	public ModelAndView getPost(String userName){
+	public ModelAndView getPost(String userName){  //POST传入的参数直接传入该函数
 		String result ="userName is "+userName;
 		return new ModelAndView("/show", "result",result);
 	}
 	
-	
+	@RequestMapping(value="/post2", method=RequestMethod.POST)
+	public ModelAndView getPost2 (user user){  //POST传入的参数直接传入该函数
+		List userList = new ArrayList();
+		userList.add(user.getName());
+		userList.add(user.getAge());
+		userList.add(user.getSex());
+		
+		return new ModelAndView("/show", "result",userList);
+	}
 }
