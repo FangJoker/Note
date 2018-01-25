@@ -9,6 +9,10 @@
 <body>
    <h1>注解的使用<h1>
     <br/>
-     <h2>${result}</h2>
+     <h2>${result[0]}</h2>
+     <br/>
+     <h2>${result[1]}</h2>
+     <br/>
+     <h2>${result[2]}</h2>
 </body>
 </html>
