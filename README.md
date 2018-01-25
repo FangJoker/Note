@@ -731,9 +731,7 @@ helloworld.jsp 代码
 
 
 
-## 注解 ##
-
-##常用注解##
+## 常用注解 ##
 ### @Controller ###
 　　负责注册一个bean 到spring 上下文中
 ### @RequestMapping ###
@@ -742,10 +740,10 @@ helloworld.jsp 代码
 　　该注解用于读取Request请求的body部分数据，使用系统默认配置的HttpMessageConverter进行解析，然后把相应的数据绑定 到要返回的对象上 ,再把HttpMessageConverter返回的对象数据绑定到 controller中方法的参数上
 　### @ResponseBody ###
 　　该注解用于将Controller的方法返回的对象，通过适当的HttpMessageConverter转换为指定格式后，写入到Response对象的body数据区
-### @ModelAttribute  ###　　　
+### @ModelAttribute 　
 　　在方法定义上使用 @ModelAttribute 注解：Spring MVC 在调用目标处理方法前，会先逐个调用在方法级上标注了@ModelAttribute 的方法
 　　在方法的入参前使用 @ModelAttribute 注解：可以从隐含对象中获取隐含的模型数据中获取对象，再将请求参数 –绑定到对象中，再传入入参将方法入参对象添加到模型中
-### @RequestParam　 ###
+### @RequestParam###
 　　在处理方法入参处使用 @RequestParam 可以把请求参 数传递给请求方法
 ### @PathVariable ###
 　　绑定 URL 占位符到入参
@@ -788,3 +786,73 @@ JSP:
 
 ![](https://i.imgur.com/SI8DYup.png)
 ![](https://i.imgur.com/x2Ndx2J.png)
+
+### 自动装箱 ###
+新建包com.czl.model<br>
+新建 user类
+![](https://i.imgur.com/LTIWefl.png)
+	package com.czl.model;
+
+	public class user {
+    private String name;
+    private int age;
+    private String sex;
+    //每个属性都要有 get...和set...方法
+	public String getName(){     //Name 后面的必须与表单的name属性一样
+		return name;
+	}
+	public void setName(String name){   
+		this.name = name;
+	}
+	public int getAge(){         //get 后面的也必须和表单的name属性一样
+		return age;
+	}
+	public void setAge(int age){
+		this.age = age;
+		
+	}
+	public String getSex(){
+		return sex;
+	}
+	public void setSex(String sex){
+		this.sex =sex;
+	}
+	
+	}
+**JSP:**
+<br>表单部分：
+	
+	<form action="/MySpringMVC/MyController/post2" method="post">
+	</br> Name:
+	<input name="Name" >
+	</br> Age:
+	<input name="Age">
+	</br> Sex：
+	<input name="Sex">
+	<button type="submit">提交</button>
+	</form>
+<br>
+<br>展示数据部分：
+	 
+     < h1 >注解的使用< /h1>
+     <br/>
+     < h2>${result[0]}</ h2>
+     <br/>
+     < h2>${result[1]}</ h2>
+     <br/>
+     < h2>${result[2]}</ h2>
+
+![](https://i.imgur.com/4sIIHYW.png)
+
+**controller:**<br>
+	
+	@RequestMapping(value="/post2", method=RequestMethod.POST)
+	public ModelAndView getPost2 (user user){  //传入 user类 自动装箱
+		List userList = new ArrayList();
+		userList.add(user.getName());
+		userList.add(user.getAge());
+		userList.add(user.getSex());
+		return new ModelAndView("/show", "result",userList);  //传入数组实现传入多个参数
+	}
+**传参效果：**<br>
+![](https://i.imgur.com/zlCUJEV.png)
