@@ -8,10 +8,14 @@
 <title>my first Srping MVC</title>
 </head>
 <body>
-	表单
-	<form action="/MySpringMVC/MyController/post" method="post">
-	</br> 用户名：
-	<input name="userName" >
+	Form
+	<form action="/MySpringMVC/MyController/post2" method="post">
+	</br> Name:
+	<input name="Name" >
+	</br> Age:
+	<input name="Age">
+	</br> Sex：
+	<input name="Sex">
 	<button type="submit">提交</button>
 	</form>
 	
