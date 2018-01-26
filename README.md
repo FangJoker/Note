@@ -885,7 +885,7 @@ JSP:
 	</br> Age:
 	<input name="Age" id="Age">
 	</br> Sex：
-	<input name="Sex" id="Age">
+	<input name="Sex" id="Sex">
 	<button type="button"  OnClick="submit()">提交</button>
 	
 	
@@ -916,7 +916,7 @@ JSP:
 
 	</script>
 
-![](https://i.imgur.com/P7K8MWT.png)
+![](https://i.imgur.com/vzK1zI0.png)
 
 使用@ResponseBody注解会简单很多，可以直接把User输数据Model的数据转成json输出到页面，不用利用pringWriter先输出到字符流再输出到页面。
 但是如要导入以下包：<br>
