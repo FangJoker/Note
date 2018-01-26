@@ -921,4 +921,4 @@ JSP:
 使用@ResponseBody注解会简单很多，可以直接把User输数据Model的数据转成json输出到页面，不用利用pringWriter先输出到字符流再输出到页面。
 但是如要导入以下包：<br>
 ![](https://i.imgur.com/56RtlcY.png)
-Controller 代码这边直接 return user这个事先写好的user数据模型类。 
+Controller 代码这边直接 return user这个事先写好的user数据模型object
