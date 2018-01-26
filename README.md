@@ -856,3 +856,69 @@ JSP:
 	}
 **传参效果：**<br>
 ![](https://i.imgur.com/zlCUJEV.png)
+### AJAX异步交互 ###
+最原始的向jsp页面输出 json的方法，如下:<br>
+**Controller:**
+		
+		@RequestMapping(value="/ajax", method=RequestMethod.POST)
+		public void getPost3 (user user, HttpServletResponse response, String Name){  //POST传入的参数直接传入该函数
+			String json	="{\"Name\" :\" "+Name+"\",\"Age\":\" "+user.getAge()+"\", \"Sex\":\" "+user.getSex()+"\"}";  //拼接json字符串,这种方法最为蛋疼的地方
+			PrintWriter out = null;
+			response.setContentType("application/json");
+			
+			try{          //将json输出到Jsp页面全程捕获IOExcetion
+				out = response.getWriter();
+				out.write(json);
+			}catch (IOException e){
+				e.printStackTrace();
+			}	
+		}
+
+**jsp:**<br>
+	<title>my first Srping MVC</title>
+
+	</head>
+	<body>
+
+	</br> Name:
+	<input name="Name" id="Name">
+	</br> Age:
+	<input name="Age" id="Age">
+	</br> Sex：
+	<input name="Sex" id="Age">
+	<button type="button"  OnClick="submit()">提交</button>
+	
+	
+	<script type="text/javascript" src="../js/jquery-1.10.2.min.js"></script>	
+	<script type="text/javascript" src="../js/jquery.min.js"></script>
+	<script type="text/javascript">
+
+      function submit(){
+        var Name = $("#Name").val();
+         var Age  = $("#Age").val();
+         var Sex  = $ ("#Sex").val();
+        
+          $.ajax({
+              url: "/MySpringMVC/MyController/ajax",
+              type : 'json',
+              method : 'post',
+              data : {'Age': Age, 'Name': Name, 'Sex':Sex},
+              success:function(data){   
+                 console.log(data);
+                  console.log(Name);
+              },
+              error :function(data){
+                 console.log("error");
+              }
+
+          });
+      }
+
+	</script>
+
+![](https://i.imgur.com/P7K8MWT.png)
+
+使用@ResponseBody注解会简单很多，可以直接把User输数据Model的数据转成json输出到页面，不用利用pringWriter先输出到字符流再输出到页面。
+但是如要导入以下包：<br>
+![](https://i.imgur.com/56RtlcY.png)
+Controller 代码这边直接 return user这个事先写好的user数据模型类。 
