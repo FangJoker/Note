@@ -875,7 +875,7 @@ JSP:
 		}
 
 **jsp:**<br>
-	<title>my first Srping MVC</title>
+	
 
 	</head>
 	<body>
