@@ -37,7 +37,7 @@ public class FirstController {
 	}
 	
 	@RequestMapping(value="/post", method=RequestMethod.POST)
-	public ModelAndView getPost(String Name){  //POST传入的参数直接传入该函数
+	public ModelAndView getPost(String Name){   //POST传入的参数直接传入该函数
 		String result ="userName is "+Name;
 		return new ModelAndView("/show", "result",result);
 	}
@@ -55,14 +55,13 @@ public class FirstController {
 	
 	@RequestMapping(value="/ajax", method=RequestMethod.POST)
 	public void getPost3 (user user, HttpServletResponse response, String Name){  //POST传入的参数直接传入该函数
-		
 		String json	="{\"Name\" :\" "+Name+"\",\"Age\":\" "+user.getAge()+"\", \"Sex\":\" "+user.getSex()+"\"}";  //拼接json字符串
 		PrintWriter out = null;
 		response.setContentType("application/json");
 		
-		try{          //将json输出到Jsp页面全程捕获IOExcetion
-			out = response.getWriter();
-			out.write(json);
+		try{         	 //将json输出到Jsp页面全程捕获IOExcetion
+			out = response.getWriter();  
+			out.write(json);  //将json写入到字符输出流
 		}catch (IOException e){
 			e.printStackTrace();
 		}	

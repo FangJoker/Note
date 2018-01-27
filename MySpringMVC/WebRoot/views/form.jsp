@@ -5,7 +5,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
-<title>my first Srping MVC</title>
+<title>Form</title>
 
 </head>
 <body>
@@ -15,7 +15,7 @@
 	</br> Age:
 	<input name="Age" id="Age">
 	</br> Sex：
-	<input name="Sex" id="Age">
+	<input name="Sex" id="Sex">
 	<button type="button"  OnClick="submit()">提交</button>
 	
 	
