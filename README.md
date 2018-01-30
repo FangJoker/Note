@@ -928,3 +928,43 @@ Controller 代码这边直接 return user这个事先写好的user数据模型ob
         u.setAge(20);
         return u;
     }
+### 文件上传 ###
+
+
+#### 首先导入俩个spring文件上传需要的两个包 ####
+![](https://i.imgur.com/Ngzo6er.png)
+
+#### 配置beans   ####
+
+	<bean id="multipartResolver"  class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		    <property name="maxUploadSize" value="102400000"></property>
+		    <property name="defaultEncoding" value="utf-8"/>
+		    <property name="maxInMemorySize" value="4060"/>  <!-- 缓存大小 -->
+		</bean>
+#### 控制器代码 ####
+ 
+	@RequestMapping(value="/upload",method=RequestMethod.POST) //方法必须为Post
+	public ModelAndView Upload(@RequestParam("file") CommonsMultipartFile file,HttpServletRequest request)throws IOException{ //使用@RequestParam注解传入参数"file"， "file"与表单的文件name属性应该相同。 传入CommonsMultipartFile 文件解析器
+		if(!file.isEmpty()){
+			try{
+				SimpleDateFormat df=new SimpleDateFormat("yyyyMMddHHmmss");
+				FileOutputStream os = new FileOutputStream("C:/Users/59859/Workspaces/MyEclipse 2016 CI/MySpringMVC/WebRoot/images/" + df.format(new Date()) + file.getOriginalFilename());
+				InputStream in = file.getInputStream();
+				int b =0;
+				while((b=in.read()) != -1){
+					os.write(b);
+				}
+				os.flush();
+				os.close();
+				in.close();				
+			}catch (FileNotFoundException e) {				
+				e.printStackTrace();
+			}
+			return new ModelAndView("/success", "file", file.getOriginalFilename());
+		}else{
+			return new ModelAndView("/success", "file", "找不到文件");
+		}
+	
+	}
+
+
