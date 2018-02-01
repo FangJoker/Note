@@ -967,4 +967,25 @@ Controller 代码这边直接 return user这个事先写好的user数据模型ob
 	
 	}
 
-
+### 上传文件优化  ###
+上面是原生的文件上传，用了FileInputStreamd文件流的形式，比较慢，下面是SpringMVC自带的文件上传解析器用法，能很好的处理多文件上传。
+![](https://i.imgur.com/uawvRwY.png)
+	
+	@RequestMapping(value ="/upload2" ,method=RequestMethod.POST)
+	public ModelAndView Upload2(HttpServletRequest request, HttpServletResponse response) throws IllegalStateException, IOException{
+		CommonsMultipartResolver multipartResolver  = new CommonsMultipartResolver(request.getSession().getServletContext());  //加载文件解析器，传入配置信息
+		if(multipartResolver.isMultipart(request)){  //判断request里是否有文件
+			MultipartHttpServletRequest  multiRequest = (MultipartHttpServletRequest)request; //将request转换为MultipartHttpServletRequest
+			Iterator<String>  iter = multiRequest.getFileNames(); //启用迭代器获取文件名
+			 while(iter.hasNext()){   //遍历文件
+				 MultipartFile file = multiRequest.getFile((String)iter.next());  //取得文件
+				  if(file != null){
+					  String fileName = "Upload" + file.getOriginalFilename(); //文件名
+					  String path = "C:/Users/59859/Workspaces/MyEclipse 2016 CI/MySpringMVC/WebRoot/images/" + fileName;      //储存路径
+					  File localFile = new File(path);
+					  file.transferTo(localFile);    //利用SpringMVC自带的方法上传文件到本地
+				  }
+			 }  
+		}
+		return new ModelAndView("/success", "file","文件上传成功！");
+	}
