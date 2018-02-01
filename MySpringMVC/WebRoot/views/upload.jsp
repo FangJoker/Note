@@ -9,7 +9,7 @@
 <body>
   
   <h>上传文件</h>
-	<form name="userForm" action="/MySpringMVC/File/upload" method="post" enctype="multipart/form-data" >
+	<form name="userForm" action="/MySpringMVC/File/upload2" method="post" enctype="multipart/form-data" >
 		选择文件：<input type="file" name="file">
 		<input type="submit" value="上传" >	
 	
