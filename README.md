@@ -928,7 +928,8 @@ Controller 代码这边直接 return user这个事先写好的user数据模型ob
         u.setAge(20);
         return u;
     }
-### 使用@ResponseBody注解优雅的响应输出json兼Restful风格 ###
+
+### 使用@ResponseBody 输出json ###
 1. 先导入三个包
 ![](https://i.imgur.com/xcByR1o.png)
 2. 在servlet.xml加上以下配置信息
@@ -955,6 +956,14 @@ Controller 代码这边直接 return user这个事先写好的user数据模型ob
 控制器代码：<br>
 
        @ResponseBody
+	   @RequestMapping(value="/getUserInfo" ,method=RequestMethod.POST)
+	   public user getUserInfo(user u){ //接收URL参数id
+	   u.setMsg("查询结果：用户Id:"+u.getId());
+	   return u;               //返回user对象信息（自动转为json）	  
+    }
+![](https://i.imgur.com/5V2R15q.png)
+#### RESTFUL 风格 ####
+	 @ResponseBody
 	   @RequestMapping(value="/userInfo/{id}" ,method=RequestMethod.GET)
 	   public user userInfo(@PathVariable("id") int id){ //接收URL参数id
 	   user u = new user();
@@ -962,8 +971,8 @@ Controller 代码这边直接 return user这个事先写好的user数据模型ob
 	   u.setName("巧");
 	   u.setSex("男");
 	   u.setId(id);
-	   return u;               //返回user对象信息（自动转为json）	   
-    } 
+	   return u;               //返回user对象信息（自动转为json）	  
+   }
 ![](https://i.imgur.com/BqVMDV5.png)
      
 
