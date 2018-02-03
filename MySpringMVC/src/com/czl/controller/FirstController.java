@@ -8,17 +8,20 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 import com.czl.model.*;
 
+
 @Controller  
 @RequestMapping("/MyController")  //访问标记
 
 public class FirstController {
-  
+	 
 	@RequestMapping("/hi")  
     public String hello(Model model) {  
         model.addAttribute("greeting", "Hello QiaoH ");  
@@ -64,6 +67,18 @@ public class FirstController {
 			out.write(json);  //将json写入到字符输出流
 		}catch (IOException e){
 			e.printStackTrace();
-		}	
+		}
 	}
+   
+   //RESTFul风格
+   @ResponseBody
+   @RequestMapping(value="/userInfo/{id}" ,method=RequestMethod.GET)
+   public user userInfo(@PathVariable("id") int id){ //接收URL参数id
+	   user u = new user();
+	   u.setAge(20);
+	   u.setName("巧");
+	   u.setSex("男");
+	   u.setId(id);
+	   return u;               //返回user对象信息（自动转为json）	  
+   }
 }
