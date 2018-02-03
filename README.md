@@ -928,6 +928,45 @@ Controller 代码这边直接 return user这个事先写好的user数据模型ob
         u.setAge(20);
         return u;
     }
+### 使用@ResponseBody注解优雅的响应输出json兼Restful风格 ###
+1. 先导入三个包
+![](https://i.imgur.com/xcByR1o.png)
+2. 在servlet.xml加上以下配置信息
+  
+    <!-- 使用@ResponseBody响应输出json配置 -->
+		<bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">  
+		    <property name="messageConverters">  
+		        <list>  
+		            <ref bean="mappingJackson2HttpMessageConverter" />  
+		        </list>  
+		    </property>  
+     	</bean>  
+		<bean id="mappingJackson2HttpMessageConverter"   
+		        class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">  
+		    <property name="supportedMediaTypes">  
+		        <list>  
+		            <value>application/json;charset=UTF-8</value>  
+		            <value>text/html;charset=UTF-8</value>  
+		            <value>text/json;charset=UTF-8</value>      
+		        </list>  
+		    </property>  
+		 </bean> 
+
+控制器代码：<br>
+
+       @ResponseBody
+	   @RequestMapping(value="/userInfo/{id}" ,method=RequestMethod.GET)
+	   public user userInfo(@PathVariable("id") int id){ //接收URL参数id
+	   user u = new user();
+	   u.setAge(20);
+	   u.setName("巧");
+	   u.setSex("男");
+	   u.setId(id);
+	   return u;               //返回user对象信息（自动转为json）	   
+    } 
+![](https://i.imgur.com/BqVMDV5.png)
+     
+
 ### 文件上传 ###
 
 
