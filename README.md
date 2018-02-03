@@ -957,7 +957,7 @@ Controller 代码这边直接 return user这个事先写好的user数据模型ob
 
        @ResponseBody
 	   @RequestMapping(value="/getUserInfo" ,method=RequestMethod.POST)
-	   public user getUserInfo(user u){ //接收URL参数id
+	   public user getUserInfo(user u){ 
 	   u.setMsg("查询结果：用户Id:"+u.getId());
 	   return u;               //返回user对象信息（自动转为json）	  
     }
