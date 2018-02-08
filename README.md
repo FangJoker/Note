@@ -1037,3 +1037,57 @@ Controller 代码这边直接 return user这个事先写好的user数据模型ob
 		}
 		return new ModelAndView("/success", "file","文件上传成功！");
 	}
+### 异常处理 ###
+
+#### 局部异常处理 ####
+局部异常使用使用@ExceptionHandler注解进行处理且**进行异常处理的方法必须与出错的方法在同一个Controller里面**
+
+可以新建一个Jsp视图"error"在前端显示错误信息<br>
+控制器代码示例：<br>
+ 
+	//创建处理异常的类,这个类会处理当前控制器下的myException这个自定义异常
+	   @ExceptionHandler(myException.class)
+	   public ModelAndView exceptionHandler(Exception ex){
+	       ModelAndView mv = new ModelAndView("error");  //实例化异常处理视图
+	       System.out.println("in testExceptionHandler");  //处理异常的code
+	       System.out.println(ex.getMessage());        //异常信息
+	       return mv;          //返回error.jsp 视图
+	   }
+	   //局部异常   
+	   @RequestMapping("/error")
+	   public String error()throws myException {
+	       if(true){
+	    	   throw new myException(); 
+	       }
+	       return "exception";
+	   }
+![](https://i.imgur.com/zvCOiqu.png)
+#### 全局异常 ####
+使用 @ControllerAdvice 注解<br>
+首先定义一个全局异常类
+
+	@ControllerAdvice
+	@Controller
+	public class ErrorController {
+	   
+		 @ExceptionHandler
+		 public ModelAndView exceptionHandler(Exception ex){
+		        ModelAndView mv = new ModelAndView("errorAll");//全局异常视图
+		        mv.addObject("exception", ex);
+		        System.out.println("全局异常");
+		        return mv;
+		 }
+		
+	}
+
+然后在任意控制器里面SpringMVC都会自动捕获这个异常
+**当然全局异常会被局部异常覆盖**
+	  
+     //全局异常
+	   @RequestMapping("/errorAll")
+	   public String errorAll() {
+	       int i = 6/0;   //触发异常
+	       return "hello";
+	   }
+
+![](https://i.imgur.com/pTISevp.png)
