@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -81,4 +82,38 @@ public class FirstController {
 	   u.setId(id);
 	   return u;               //返回user对象信息（自动转为json）	  
    }
+   
+   @ResponseBody
+   @RequestMapping(value="/getUserInfo" ,method=RequestMethod.POST)
+   public user getUserInfo(user u){ //接收URL参数id
+	   u.setMsg("查询结果：用户Id:"+u.getId());
+	   return u;               //返回user对象信息（自动转为json）	  
+   }
+   
+   
+   
+   //创建处理异常的类,这个类会处理当前控制器下的myException这个异常
+   @ExceptionHandler(myException.class)
+   public ModelAndView exceptionHandler(Exception ex){
+       ModelAndView mv = new ModelAndView("error");  
+       System.out.println("in testExceptionHandler");  //处理异常的code
+       System.out.println(ex.getMessage());        //异常信息
+       return mv;          //返回error.jsp 视图
+   }
+   //局部异常   
+   @RequestMapping("/error")
+   public String error()throws myException {
+       if(true){
+    	   throw new myException();
+       }
+       return "exception";
+   }
+   
+   //全局异常
+   @RequestMapping("/errorAll")
+   public String errorAll() {
+       int i = 5/0;
+       return "hello";
+   }
+   
 }
