@@ -1,11 +1,13 @@
 package com.czl.model;
 
 public class user {
-    private String name;
+    
+	private String name;
     private int age;
     private String sex;
     private int id;
-    //每个属性都要有 get...和set...方法
+    private String msg;
+   
 	public String getName(){     //Name 后面的必须与表单的name属性一样
 		return name;
 	}
@@ -32,5 +34,10 @@ public class user {
 	public int getId(){
 		return this.id;
 	}
-	
+	public void setMsg(String msg){
+		this.msg = msg;
+	}
+	public String getMsg(){
+		return this.msg;
+	}
 }

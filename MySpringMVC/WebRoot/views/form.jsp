@@ -16,7 +16,9 @@
 	<input name="Age" id="Age">
 	</br> Sex：
 	<input name="Sex" id="Sex">
-	<button type="button"  OnClick="submit()">提交</button>
+	 <br> Id:
+	 <input name="Id" id="Id">
+	<button type="button"  OnClick="submit2()">提交</button>
 	
 	
 <script type="text/javascript" src="../js/jquery-1.10.2.min.js"></script>	
@@ -43,7 +45,25 @@
 
           });
       }
+      
+      function submit2(){
+        var id = $("#Id").val();
+         
+          $.ajax({
+              url: "/MySpringMVC/MyController/getUserInfo",
+              type : 'json',
+              method : 'post',
+              data : {'Id':id},
+              success:function(data){   
+                 console.log(data);
+                 alert(data.msg);          
+              },
+              error :function(data){
+                 console.log("error");
+              }
 
+          });
+      }
 </script>
 </body>
 </html>
