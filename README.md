@@ -1093,7 +1093,7 @@ Controller 代码这边直接 return user这个事先写好的user数据模型ob
 ![](https://i.imgur.com/pTISevp.png)
 
 <br>
-### 拦截器 ###
+###拦截器###
 <br>
 浏览器发起请求->preHandle(return true)->postHandle->afterCompletion->处理方法->响应
 <br>
