@@ -1097,6 +1097,7 @@ Controller 代码这边直接 return user这个事先写好的user数据模型ob
 <br>
 浏览器发起请求->preHandle(return true)->postHandle->afterCompletion->处理方法->响应
 <br>
+**个人感觉和laravel的中间件是差不多的一个东西，但是laravel的中间件比较灵活，可以在路由群里面决定是否使用中间件，而SpringMVC 只能去servelt里面去声明要拦截的url**
 ![](https://i.imgur.com/iu7zN0w.png)
 #### 设置一个自定义拦截器 ####
  创建一个MyInterceptor类，并实现HandlerInterceptor接口
