@@ -1091,3 +1091,172 @@ Controller 代码这边直接 return user这个事先写好的user数据模型ob
 	   }
 
 ![](https://i.imgur.com/pTISevp.png)
+
+<br>
+### 拦截器 ###
+浏览器发起请求->preHandle(return true)->postHandle->afterCompletion->处理方法->响应
+![](https://i.imgur.com/iu7zN0w.png)
+#### 设置一个自定义拦截器 ####
+ 创建一个MyInterceptor类，并实现HandlerInterceptor接口
+
+ 
+	package com.czl.Interceptor;
+
+	import javax.servlet.http.HttpServletRequest;
+	import javax.servlet.http.HttpServletResponse;
+	
+	import org.springframework.web.servlet.HandlerInterceptor;
+	import org.springframework.web.servlet.ModelAndView;
+	
+	public  class MyInterceptor implements HandlerInterceptor{
+
+		@Override
+		 /** 
+	     * Handler执行完成之后调用这个方法 
+	     */  
+		public void afterCompletion(HttpServletRequest arg0, HttpServletResponse arg1, Object arg2, Exception arg3)
+				throws Exception {
+			// TODO Auto-generated method stub
+			
+		}
+	
+		@Override
+	    /** 
+	     * Handler执行之后，ModelAndView返回之前调用这个方法 
+	     */  
+		public void postHandle(HttpServletRequest arg0, HttpServletResponse arg1, Object arg2, ModelAndView arg3)
+				throws Exception {
+			// TODO Auto-generated method stub
+			
+		}
+	
+		@Override
+		/** 
+	     * Handler执行之前调用这个方法 
+	     */  
+		public boolean preHandle(HttpServletRequest arg0, HttpServletResponse arg1, Object arg2) throws Exception {
+			// TODO Auto-generated method stub
+			return false;
+		}
+     
+    }
+
+配置servlet.xml
+	
+	<!-- 配置拦截器 -->
+	    <mvc:interceptors>
+	        <mvc:interceptor>
+                //所有URL均拦截 也可指定拦截某个url ，例如 "/**/hi"
+	            <mvc:mapping path="/**/"/>
+	            <bean class="com.czl.Interceptor.MyInterceptor"/>        
+	        </mvc:interceptor>
+	    </mvc:interceptors>
+	 </beans>  
+
+
+
+#### 拦截器的应用 ####
+ 
+	
+	package com.czl.Interceptor;
+
+	import javax.servlet.http.HttpServletRequest;
+	import javax.servlet.http.HttpServletResponse;
+	import javax.servlet.http.HttpSession;
+	
+	import org.springframework.web.servlet.HandlerInterceptor;
+	import org.springframework.web.servlet.ModelAndView;
+	
+	import com.czl.model.user;
+	
+	public  class MyInterceptor implements HandlerInterceptor{
+
+	@Override
+	 /** 
+     * Handler执行完成之后调用这个方法 
+     */  
+	public void afterCompletion(HttpServletRequest arg0, HttpServletResponse arg1, Object arg2, Exception arg3)
+			throws Exception {
+		// TODO Auto-generated method stub
+		 System.out.println("afterCompletion");
+	}
+
+	@Override
+    /** 
+     * Handler执行之后，ModelAndView返回之前调用这个方法 
+     */  
+	public void postHandle(HttpServletRequest request, HttpServletResponse response, Object Obj, ModelAndView MV)
+			throws Exception {
+		// TODO Auto-generated method stub
+		 System.out.println("postHandle");
+	}
+
+	@Override
+	/** 
+     * Handler执行之前调用这个方法 
+     */  
+	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object Obj) throws Exception {
+		//获取请求的URL  
+        String url = request.getRequestURI(); 
+        if( url.indexOf("/form")>=0){
+        	return true;
+        }
+        
+        System.out.println("preHandle");
+        //转发请求
+        request.getRequestDispatcher("/MyController/form").forward(request, response);  
+        //重定向
+        //response.sendRedirect("/MyController/form");
+
+		return false;
+	}
+     
+    }
+
+**除了/form其余url均被拦截且重定向到form，如下**
+![](https://i.imgur.com/Juugefh.png)
+![](https://i.imgur.com/cug6vOk.png)
+
+这样就可以实现简单的登陆
+
+	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object Obj) throws Exception {
+			//获取请求的URL  
+	        String url = request.getRequestURI(); 
+	        if( url.indexOf("/form")>=0){
+	        	return true;
+	        }
+	        //获取Session  
+	        HttpSession session = request.getSession();  
+	        String username = (String)session.getAttribute("username");  
+	          
+	        if(username != null){  
+	           //一系列数据库操作 
+               return true;  
+	        }  
+	         
+	        //重定向
+	        response.sendRedirect("/MyController/form");
+	
+			return false;
+		}
+
+控制器：<br>
+
+	@RequestMapping(value="/post", method=RequestMethod.POST)
+		public ModelAndView getPost(String Name,HttpSession session){   //POST传入的参数直接传入该函数
+			String result ="userName is "+Name;
+			//在Session里保存信息  
+	        session.setAttribute("username", Name);  
+			return new ModelAndView("/show", "result",result);
+		}
+
+#### 转发与重定向 ####
+
+request.getRequestDispatcher().forward()和重定向response.sendRedirect()的区别：<br>
+　　
+
+1. 转发是一次请求，一次响应，而重定向是两次请求，两次响应
+2. 转发：servlet和jsp**共享一个request**，重定向：两次请求request独立，所以前面request里面setAttribute()的任何东西，在后面的request里面都获取不到
+3. 转发：地址栏不会改变，重定向：地址栏发生变化。
+ 
+　　

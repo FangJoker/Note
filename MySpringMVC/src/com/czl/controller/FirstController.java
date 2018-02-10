@@ -5,6 +5,7 @@ import java.io.PrintWriter;
 import java.util.*;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -41,8 +42,10 @@ public class FirstController {
 	}
 	
 	@RequestMapping(value="/post", method=RequestMethod.POST)
-	public ModelAndView getPost(String Name){   //POST传入的参数直接传入该函数
+	public ModelAndView getPost(String Name,HttpSession session){   //POST传入的参数直接传入该函数
 		String result ="userName is "+Name;
+		//在Session里保存信息  
+        session.setAttribute("username", Name);  
 		return new ModelAndView("/show", "result",result);
 	}
 	

@@ -52,5 +52,13 @@
 		        </list>  
 		    </property>  
 		 </bean>  
+		 
+  <!-- 配置拦截器 -->
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <mvc:mapping path="/MyController/hi"/>
+            <bean class="com.czl.Interceptor.MyInterceptor"/>        
+        </mvc:interceptor>
+    </mvc:interceptors>
  </beans>  
  
