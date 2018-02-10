@@ -1094,7 +1094,9 @@ Controller 代码这边直接 return user这个事先写好的user数据模型ob
 
 <br>
 ### 拦截器 ###
+<br>
 浏览器发起请求->preHandle(return true)->postHandle->afterCompletion->处理方法->响应
+<br>
 ![](https://i.imgur.com/iu7zN0w.png)
 #### 设置一个自定义拦截器 ####
  创建一个MyInterceptor类，并实现HandlerInterceptor接口
