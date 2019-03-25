@@ -1263,6 +1263,464 @@ request.getRequestDispatcher().forward()和重定向response.sendRedirect()的�
 1. 转发是一次请求，一次响应，而重定向是两次请求，两次响应
 2. 转发：servlet和jsp**共享一个request**，重定向：两次请求request独立，所以前面request里面setAttribute()的任何东西，在后面的request里面都获取不到
 3. 转发：地址栏不会改变，重定向：地址栏发生变化。
- 
 
-#### 表单的验证 ####
+
+#Docker#
+## 在centos6.7上安装内核 ##
+1. 查看内核版本 `# uname -r` 内核版本必须大于3.10
+2. `yum -y install docker` 安装docker
+3. `service docker start` 启动docker
+## （坑一）内核更新 ##
+1. `rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org` 导入public key
+2. `rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-3.el7.elrepo.noarch.rpm`为RHEL-7，SL-7或CentOS-7安装ELRepo
+3. `rpm -Uvh http://www.elrepo.org/elrepo-release-6-8.el6.elrepo.noarch.rpm` 为RHEL-6，SL-6或CentOS-6安装ELRepo
+4. `yum --enablerepo=elrepo-kernel install kernel-lt -y`  升级Kernel
+5. `vim /etc/grub.conf` 修改grub。根据安装好以后的内核位置，修改 default 的值，一般是修改为0，因为 default 从 0 开始，一般新安装的内核在第一个位置，所以设置default=0
+6. 所有操作都执行完毕以后，重启主机，重启后执行 uname -r，查看内核版本号。`uname -r`
+
+## 使用docker搭建基础镜像 ##
+### Nginx ###
+1. `docker pull nginx`
+![](https://i.imgur.com/6Fa7EPu.png)
+查看已安装的镜像
+
+2. 创建Nginx容器 
+<br>
+先建立三个文件夹，用来映射容器内部的文件
+![](https://i.imgur.com/Yl6tBUO.png)
+创建容器（-v 后面跟的是容器目录映射到宿主机的目录）<br>`docker run --name mynginx -d -p 82:80  -p 83:443  -v /var/local/software/nginx/logs:/var/log/nginx -v /var/local/software/nginx/etc/conf/:/etc/nginx/conf.d/ -v /var/local/software/nginx/www:/usr/share/nginx/html  -d nginx`
+容器目录根据实际情况而定，最好使用`docker exec -it 容器ID` <br>进入容器查看一下具体的目录结构，这里是把容器的 /etc/nginx/conf.d/ 路径映射到宿主机的/var/local/software/nginx/etc/conf/。 容器的/etc/nginx/conf.d/ 有一个 default.conf 主要添加一些server的配置, 在容器的/etc/nginx/nginx.conf 有include进来 default.conf。<br>
+（-p 后面接的是容器的端口对外暴露的端口映射， 82用来http, 83用来https）
+3. `docker ps -a`查看容器运行情况
+![](https://i.imgur.com/2jJ4PkU.png)
+
+4. 配置SSL证书
+因为已经把容器的/etc/nginx/conf.d/ 映射出来了，直接在主机的相应目录放入cert证书
+![](https://i.imgur.com/3PKFd8S.png)
+
+5. **修改default.conf配置信息（坑二）**
+
+这里的 default.conf 主要是用来添加server信息的， http配置在容器的/etc/nginx/nginx.conf，如果在sefault.conf 加上http配置 先要去容器内部看看 那些配置是已经定义了，不然配置信息重复定义，整个容器起不来。<br>
+default.conf 配置：<br><br>
+
+		 server_names_hash_bucket_size 128;
+		        client_header_buffer_size 32k;
+		        large_client_header_buffers 4 32k;
+		        client_max_body_size 50m;
+		
+		        tcp_nopush on;
+		
+		
+		        tcp_nodelay on;
+		
+		        fastcgi_connect_timeout 300;
+		        fastcgi_send_timeout 300;
+		        fastcgi_read_timeout 300;
+		        fastcgi_buffer_size 64k;
+		        fastcgi_buffers 4 64k;
+		        fastcgi_busy_buffers_size 128k;
+		        fastcgi_temp_file_write_size 256k;
+		
+		        gzip on;
+		        gzip_min_length  1k;
+		        gzip_buffers     4 16k;
+		        gzip_http_version 1.1;
+		        gzip_comp_level 2;
+		        gzip_types     text/plain application/javascript application/x-javascript text/javascript text/css application/xml application/xml+rss;
+		        gzip_vary on;
+		        gzip_proxied   expired no-cache no-store private auth;
+		        gzip_disable   "MSIE [1-6]\.";
+		
+		        #limit_conn_zone $binary_remote_addr zone=perip:10m;
+		        ##If enable limit_conn_zone,add "limit_conn perip 10;" to server section.
+		
+		        server_tokens off;
+		        access_log off;
+		
+		
+		server {
+		    
+		    listen       80 default_server;
+		    server_name  localhost;
+		    root   /usr/share/nginx/html;
+		    index  index.html index.htm;
+		    #https
+		    listen 443 ssl ;
+		    server_name www.xxx.cn;
+		    #ssl on;
+		    ssl_certificate   conf.d/cert/214874987680217.pem;
+		    ssl_certificate_key  conf.d/cert/214874987680217.key;
+		    ssl_session_timeout 5m;
+		    ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:ECDHE:ECDH:AES:HIGH:!NULL:!aNULL:!MD5:!ADH:!RC4;
+		    ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+		    ssl_prefer_server_ciphers on;
+		
+		    #charset koi8-r;
+		    #access_log  /var/log/nginx/host.access.log  main;
+		
+		    location / {
+		        root   /usr/share/nginx/html;
+		        index  index.html index.htm;
+		    }
+		
+		    #error_page  404              /404.html;
+		
+		    # redirect server error pages to the static page /50x.html
+		    #
+		    error_page   500 502 503 504  /50x.html;
+		    location = /50x.html {
+		        root   /usr/share/nginx/html;
+		    }
+		
+		    # proxy the PHP scripts to Apache listening on 127.0.0.1:80
+		    #
+		    #location ~ \.php$ {
+		    #    proxy_pass   http://127.0.0.1;
+		    #}
+		
+		    # pass the PHP scripts to FastCGI server listening on 127.0.0.1:9000
+		    #
+		    #location ~ \.php$ {
+		    #    root           html;
+		    #    fastcgi_pass   127.0.0.1:9000;
+		    #    fastcgi_index  index.php;
+		    #    fastcgi_param  SCRIPT_FILENAME  /scripts$fastcgi_script_name;
+		    #    include        fastcgi_params;
+		    #}
+		
+		    # deny access to .htaccess files, if Apache's document root
+		    # concurs with nginx's one
+		    #
+		    #location ~ /\.ht {
+		    #    deny  all;
+		    #}
+		}
+
+然后访问 https://www.xxx.cn:83 就可以看到主机 /var/local/software/nginx/ww 目录下的东西
+**最后别忘记开安全组** 不然一直连接超时
+
+## DockerFile ##
+使用DockerFile 创建java springboot 工程镜像
+1. 在src下新建docker文件夹，新建文件DocerFile
+
+	FROM frolvlad/alpine-oraclejdk8:slim
+	VOLUME /tmp
+	ADD demo.jar app.jar
+	RUN sh -c 'touch /app.jar'
+	ENV JAVA_OPTS=""
+	ENTRYPOINT [ "sh", "-c", "java $JAVA_OPTS -Djava.security.egd=file:/dev/./urandom -jar /app.jar" ]
+
+FROM       ：指定基础镜像
+VOLUME     ：指定临时工作空间
+ADD        ：将springboot项目的 demo.jar 作为app.jar加入到镜像<br>
+ENTRYPOINT :执行项目 app.jar。为了缩短 Tomcat 启动时间，添加一个系统属性指向 “/dev/urandom” 作为 Entropy Source
+2. maven 配置
+<!--加入maven插件“docker-maven-plugin”-->
+
+    <properties>       
+        <!--properties节点中设置docker镜像的前缀“springboot”-->
+        <docker.image.prefix>springboot</docker.image.prefix>
+    </properties>
+
+
+            <plugin>
+                <groupId>com.spotify</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <!--<version>0.2.3</version>-->
+                <version>0.4.11</version>
+                <configuration>
+                    <imageName>${docker.image.prefix}/${project.artifactId}</imageName>
+                    <dockerDirectory>src/main/docker</dockerDirectory>
+                    <resources>
+                        <resource>
+                            <targetPath>/</targetPath>
+                            <directory>${project.build.directory}</directory>
+                            <include>${project.build.finalName}.jar</include>
+                        </resource>
+                    </resources>
+                </configuration>
+            </plugin>
+
+
+3. 来到Dockerfile所在目录下创建容器 `docker bulid -t springboot .` 
+4. 运行容器 `docker run -d -p 8080:8080  springboot`
+
+# vue 2.0 #
+## 安装cnmp ##
+在安装了node.js的前提下，使用npm安装cnpm。
+> npm i -g cnpm
+![](https://i.imgur.com/EBqFs1S.png)
+
+## 使用cnpm 安装live-server ##
+这个个人认为可有可无，如果已经部署了lnmp/lamp，这可以不必理会。
+> cnpm i -g live-server
+![](https://i.imgur.com/MNtvP9B.png)
+
+最后初始化vue项目，准备工作完成。
+
+> cnpm init<br>
+
+完成后会在vue目录下生成package.json
+我的目录如下![](https://i.imgur.com/hNdW6lr.png)
+
+在cmd命令行输入 live-server即可开启项目
+## 相关指令 ##
+### v-if ###
+和if语句类似，相关demo
+
+	  <h1>v-if 判断</h1>
+	            <hr>
+	            <div id="app">
+	                <div v-if="isTrue">QiaoH</div>
+	                <div v-else>false</div>
+	         
+	            </div>
+
+	   <script type="text/javascript">
+	                var app=new Vue({
+	                    el:'#app',
+	                    data:{
+	                       isTrue:false
+	                    }
+	                })
+	         </script>
+效果：<br>
+![](https://i.imgur.com/tc3njTj.png)
+功能类似的有**v-show**指令<br>
+区别在于
+
+- v-if： 判断是否加载，可以减轻服务器的压力，在需要时加载。
+- v-show：调整css dispaly属性，可以使客户端操作更加流畅。
+
+### v-for ###
+v-for指令是循环渲染一组data中的数组，v-for 指令需要以 item in items 形式的特殊语法，items 是源数据数组并且item是数组元素迭代的别名。<br>
+
+ 
+          </div><h1>v-for</h1>
+            <hr>
+          <div id="app">
+             <ul>
+                 <li v-for="item in items">
+                      {{item}}
+                 </li>
+             </ul>
+
+
+	<script type="text/javascript">
+	                var app=new Vue({
+	                    el:'#app',
+	                    data:{
+	                       items:['java','php','redis','mongdb']
+	                    }
+	                })
+	         </script>
+
+![](https://i.imgur.com/7Wu4ABv.png)
+
+特别提一下，当对循环对象做出修改的时候，必须重新声明一个对象。
+
+	   function sortNumber(a,b){
+	                          return a-b
+	                }
+	
+	                var app=new Vue({
+	                    el:'#app',
+	                    data:{
+	                       items:[99,100,88,15,16,20]
+	                    },
+	                    computed:{
+	                      sortItems:function(){
+	                            return this.items.sort(sortNumber);
+	                      }
+	                  }
+	                })
+**
+在computed里新声明了一个对象sortItems，如果不重新声明会污染原来的数据源，这是Vue不允许的，所以你要重新声明一个对象。**
+
+对象的循环输出：
+
+	  <h1>v-for</h1>
+	            <hr>
+	          <div id="app">
+	             <ul>
+	                 <li v-for="(student,index) in students">
+	                     {{index}}：{{student.name}} - {{student.age}}
+	                 </li>
+	             </ul>
+	          </div>
+	     
+	
+	        <script type="text/javascript" src = "../assets/js/vue.js"></script>
+	          <script type="text/javascript">
+	               //对象排序方法
+	               function sortByKey(array,key){
+	                  return array.sort(function(a,b){
+	                    var x=a[key];
+	                    var y=b[key];
+	                    return ((x<y)?-1:((x>y)?1:0));
+	                 });
+	              }
+	                var app=new Vue({
+	                    el:'#app',
+	                    data:{
+	                       students:[
+	                          {name:'qiao',age:20},
+	                          {name:'qiaoh',age:22},                  
+	                        ]
+	                    },
+	
+	                computed:{
+	                    sortStudents:function(){
+	                        return sortByKey(this.students,'age');
+	                    }
+	                }
+	                   
+	                })
+	         </script>
+
+## v-text & v-html ##
+
+在直接使用渲染变量 {{xxx}}是有弊端的，是当我们网速很慢或者javascript出错时，会暴露我们的{{xxx}}。
+如下:![](https://i.imgur.com/rdze9AY.png)
+
+使用v-text 指令可避免。
+
+如果在javascript中写有html标签则使用v-html
+
+示例代码：<br>
+
+	<div id="app">
+	        <span>{{ message }}</span>=<span v-text="message"></span><br/>
+            <span v-html="msgHtml"></span>
+	       
+	    </div>
+	 
+	     
+	
+	        <script type="text/javascript" src = "../assets/js/vue.js"></script>
+	          <script type="text/javascript">
+	                var app=new Vue({
+	                  el:'#app',
+	                  data:{
+	                      message:'QiaoH',
+	                      msgHtml:'<h2>QiaoH</h2>'
+	                  }
+	              })
+	              </script>
+
+![](https://i.imgur.com/yfIwRez.png)
+
+## v-on 绑定事件 ##
+首先是onclik事件
+<h1>v-on 事件监听器</h1>
+    
+    <hr>
+    <div id="app">
+       本场比赛得分： {{count}}<br/>
+       <button v-on:click="jiafen">加分</button>
+       <button v-on:click="jianfen">减分</button>
+ 
+    </div>
+ 
+     
+
+        <script type="text/javascript" src = "../assets/js/vue.js"></script>
+          <script type="text/javascript">
+                var app=new Vue({
+                  el:'#app',
+                  data:{
+                      count:1
+                  },
+                  methods:{
+                      jiafen:function(){
+                          this.count++;
+                      },
+                      jianfen:function(){
+                          this.count--;
+                      }
+                  }
+              })
+
+              </script>
+
+类似的事件还有  keyup.enter 键盘回车事件。
+
+## 双向数据绑定 ##
+
+指令 
+> v-model 
+
+示例代码：
+
+    <div id="app">
+        <p>原始文本信息：{{message}}</p>
+        <h3>文本框</h3>
+        <p>v-model:<input type="text" v-model="message"></p>
+    </div>
+     
+
+        <script type="text/javascript" src = "../assets/js/vue.js"></script>
+          <script type="text/javascript">
+               var app=new Vue({
+                  el:'#app',
+                  data:{
+                       message:'hello Vue!'
+                  }
+                 })
+
+              </script>
+
+修饰符
+1. .lazy：取代 imput 监听 change 事件。当鼠标焦点离开输入框的时候绑定数据改变
+2. .number：输入字符串转为数字。先输入数字后，再输入字母不进行双向绑定
+3. trim：输入去掉首尾空格。
+
+ 	 
+	<p>v-model:<input type="text" v-model.lazy="message"></p>
+ 	
+	<p>v-model:<input type="text" v-model.number="message"></p>
+    
+   
+	<p>v-model:<input type="text" v-model.trim="message"></p>
+
+### 选按钮绑定一个值 ###
+
+      <h3>多选按钮绑定一个值</h3>
+      <input type="checkbox" id="isTrue" v-model="isTrue">
+      <label for='isTrue'>{{isTrue}}</label>
+
+     <script type="text/javascript">
+               var app=new Vue({
+                  el:'#app',
+                  data:{
+                       message:'hello Vue!',
+                       isTrue:true
+                   }
+                 })
+
+              </script>
+
+### 多选绑定一个数组 ###
+
+    <h3>多选绑定一个数组</h3>
+       <p>
+            <input type="checkbox" id="java" value="java" v-model="langurage">
+            <label for="java">java</label><br/>
+            <input type="checkbox" id="php" value="php" v-model="langurage">
+            <label for="php">Panda</label><br/>
+            <input type="checkbox" id="node" value="node" v-model="langurage">
+            <label for="node">PanPan</label>
+            <p>{{langurage}}</p>
+       </p>
+
+
+  	
+		var app=new Vue({
+                  el:'#app',
+                  data:{
+                       message:'hello Vue!',
+                       isTrue: true ,
+                       langurage: []
+                       
+                   }
+                 })
