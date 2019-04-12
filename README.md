@@ -1486,6 +1486,11 @@ ENTRYPOINT :执行项目 app.jar。为了缩短 Tomcat 启动时间，添加一�
 	    restart: always
 
 在 docker-composer.yml 所在目录下 **docker-compose up -d** 就可以了
+注意这里要进入mysql 容器设置root的访问权限以及登录密码
+
+	update mysql.user set authentication_string=password('PWD') where user='root' ;
+
+	GRANT ALL PRIVILEGES ON *.* TO 'root '@'%' IDENTIFIED BY 'qiao1998' WITH GRANT OPTION;
 ![](https://i.imgur.com/RsNzUq9.png)
 这边数据库地址要填db 因为已经在compose里面depends_on<br>
 nginx配置
