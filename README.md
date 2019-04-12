@@ -1265,7 +1265,7 @@ request.getRequestDispatcher().forward()和重定向response.sendRedirect()的�
 3. 转发：地址栏不会改变，重定向：地址栏发生变化。
 
 
-#Docker#
+# Docker #
 ## 在centos6.7上安装内核 ##
 1. 查看内核版本 `# uname -r` 内核版本必须大于3.10
 2. `yum -y install docker` 安装docker
@@ -1444,7 +1444,75 @@ ENTRYPOINT :执行项目 app.jar。为了缩短 Tomcat 启动时间，添加一�
 
 3. 来到Dockerfile所在目录下创建容器 `docker bulid -t springboot .` 
 4. 运行容器 `docker run -d -p 8080:8080  springboot`
+## Docker-compose 搭建gogs+mysql+nginx ##
+	version: '2'
+	services:
+	  nginx:
+	    container_name: nginx
+	    image: nginx:latest
+	    volumes:
+	      - "/opt/compose/nginx/conf/:/etc/nginx/conf.d/"
+	      - "/opt/compose/nginx/logs:/var/log/nginx"
+	      - "/opt/compose/nginx/www/:/usr/share/nginx/html"
+	    ports:
+	      - "80:80"
+	      -  "443:443"
+	    restart: always
+	  db:
+	    container_name: mysql5-7
+	    image: mysql:5.7
+	    volumes:
+	      - "/opt/compose/mysql/:/var/lib/mysql"
+	    restart: always
+	    environment:
+	      MYSQL_ROOT_PASSWORD: xxx
+	      MYSQL_DATABASE: gogs
+	      MYSQL_USER: xxx
+	      MYSQL_PASSWORD: xxx
+	    ports:
+	      - "3308:3306"
+	  gogs:
+	    container_name: gogs
+	    depends_on:
+	      - db
+	    image: gogs/gogs
+	    volumes:
+	      - /opt/compose/gogs/:/data
+	    links:
+	      - db
+	    ports:
+	      - "3000:3000"
+	      - "3022:22"
+	    restart: always
 
+在 docker-composer.yml 所在目录下 **docker-compose up -d** 就可以了
+![](https://i.imgur.com/RsNzUq9.png)
+这边数据库地址要填db 因为已经在compose里面depends_on<br>
+nginx配置
+
+	server
+	{
+	     listen       80 default_server;
+		    server_name  git.xxx.cn;
+	     listen 443 ssl ;
+		    server_name  git.xxx.cn;
+		    #ssl on;
+		    ssl_certificate   conf.d/cert/1196049_git.xxx.pem;
+		    ssl_certificate_key  conf.d/cert/1196049_git.xxx.key;
+		    ssl_session_timeout 5m;
+		    ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:ECDHE:ECDH:AES:HIGH:!NULL:!aNULL:!MD5:!ADH:!RC4;
+		    ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+		    ssl_prefer_server_ciphers on; 
+	                    #这里尽量设置大一点，以免git push 远端掐断链接
+	                    client_max_body_size 50m;
+	    location / {
+	        proxy_redirect off;
+	        proxy_set_header Host $host;
+	        proxy_set_header X-Real-IP $remote_addr;
+	        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+	        proxy_pass http://120.78.74.109:3000; 
+	    }
+	}
 # vue 2.0 #
 ## 安装cnmp ##
 在安装了node.js的前提下，使用npm安装cnpm。
